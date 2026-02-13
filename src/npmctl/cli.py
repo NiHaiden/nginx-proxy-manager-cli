@@ -7,7 +7,10 @@ from .debug import set_debug
 
 
 def create_app() -> typer.Typer:
-    app = typer.Typer(help="CLI for managing Nginx Proxy Manager proxy hosts and certificates")
+    app = typer.Typer(
+        help="CLI for managing Nginx Proxy Manager proxy hosts and certificates",
+        context_settings={"help_option_names": ["-h", "--help"]},
+    )
 
     @app.callback()
     def main_callback(

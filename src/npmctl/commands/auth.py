@@ -19,7 +19,7 @@ def register(app: typer.Typer) -> None:
 def login(
     identity: str = typer.Option(..., help="NPM user email"),
     secret: str = typer.Option(..., prompt=True, hide_input=True, help="NPM password"),
-    base_url: Optional[str] = typer.Option(None, help="API base URL (e.g. http://host/api)"),
+    base_url: str = typer.Option(..., help="API base URL (e.g. http://host/api)"),
     scope: str = typer.Option("user", help="Token scope"),
 ) -> None:
     """Login and save your JWT token in OS keyring."""
