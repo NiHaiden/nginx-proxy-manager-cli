@@ -10,7 +10,7 @@ A small CLI for **Nginx Proxy Manager** that can:
 
 - Python 3.9+
 - [uv](https://docs.astral.sh/uv/)
-- A running Nginx Proxy Manager API endpoint (for example `http://192.168.1.246/api`)
+- A running Nginx Proxy Manager API endpoint (for example `http://10.0.2.1:81/api`)
 
 ## Install dependencies
 
