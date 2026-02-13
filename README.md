@@ -12,7 +12,16 @@ A small CLI for **Nginx Proxy Manager** that can:
 - [uv](https://docs.astral.sh/uv/)
 - A running Nginx Proxy Manager API endpoint (for example `http://10.0.2.1:81/api`)
 
-## Install dependencies
+## Install (to your home directory)
+
+```bash
+./install.sh
+```
+
+This installs the app into `~/.npmctl/venv` and places a launcher at `~/.local/bin/npmctl`.
+The installer also adds `~/.local/bin` to your shell PATH config.
+
+## Development setup
 
 ```bash
 uv sync
