@@ -1,0 +1,21 @@
+[project]
+name = "npmctl"
+version = "0.1.0"
+description = "CLI for Nginx Proxy Manager proxy hosts and Cloudflare DNS challenge certificates"
+readme = "README.md"
+authors = [
+    { name = "Niklas Haiden", email = "niklas.haiden@gmail.com" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "httpx>=0.28.1",
+    "keyring>=25.7.0",
+    "typer>=0.23.1",
+]
+
+[project.scripts]
+npmctl = "npmctl:main"
+
+[build-system]
+requires = ["uv_build>=0.10.2,<0.11.0"]
+build-backend = "uv_build"
