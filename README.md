@@ -29,7 +29,7 @@ uv sync
 
 ## CLI usage
 
-### 1) Login and store token in OS keyring
+### 1) Login and store token in OS keyring (base URL required)
 
 ```bash
 uv run npmctl login \
