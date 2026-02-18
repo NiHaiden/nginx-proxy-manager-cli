@@ -22,8 +22,21 @@ except Exception:  # pragma: no cover
 def _require_keyring() -> None:
     if keyring is None:
         raise NPMError(
-            "Secure storage backend unavailable. Install `keyring` and an OS keyring backend."
+            "Secure storage backend unavailable. Install `keyring` and an OS keyring backend. "
+            "Fallback: install `keyrings.alt` in the npmctl environment "
+            "(for example `~/.npmctl/venv/bin/pip install keyrings.alt`)."
         )
+
+
+def _keyring_backend_hint(exc: Exception) -> str:
+    message = str(exc).lower()
+    if "no recommended backend was available" in message:
+        return (
+            " Hint: install and run an OS keyring backend (Secret Service/KWallet), "
+            "or install `keyrings.alt` in the npmctl environment "
+            "(for example `~/.npmctl/venv/bin/pip install keyrings.alt`)."
+        )
+    return ""
 
 
 def get_secret(secret_name: str) -> Optional[str]:
@@ -34,7 +47,7 @@ def get_secret(secret_name: str) -> Optional[str]:
             return value
         return keyring.get_password(LEGACY_SERVICE_NAME, secret_name)
     except KeyringError as exc:
-        raise NPMError(f"Failed to read secret from keyring: {exc}") from exc
+        raise NPMError(f"Failed to read secret from keyring: {exc}{_keyring_backend_hint(exc)}") from exc
 
 
 def set_secret(secret_name: str, value: str) -> None:
@@ -42,7 +55,7 @@ def set_secret(secret_name: str, value: str) -> None:
     try:
         keyring.set_password(SERVICE_NAME, secret_name, value)
     except KeyringError as exc:
-        raise NPMError(f"Failed to store secret in keyring: {exc}") from exc
+        raise NPMError(f"Failed to store secret in keyring: {exc}{_keyring_backend_hint(exc)}") from exc
 
 
 def delete_secret(secret_name: str) -> None:
@@ -58,7 +71,7 @@ def _delete_if_exists(service_name: str, secret_name: str) -> None:
         message = str(exc).lower()
         if "not found" in message:
             return
-        raise NPMError(f"Failed to delete secret from keyring: {exc}") from exc
+        raise NPMError(f"Failed to delete secret from keyring: {exc}{_keyring_backend_hint(exc)}") from exc
 
 
 def get_login_info() -> dict[str, Any]:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typer
 
-from .commands import auth, certificates, proxy_hosts, secrets
+from .commands import auth, certificates, doctor, proxy_hosts, secrets
 from .debug import set_debug
 
 
@@ -28,6 +28,7 @@ def create_app() -> typer.Typer:
     certificates.register(app)
     proxy_hosts.register(app)
     secrets.register(app)
+    doctor.register(app)
     return app
 
 

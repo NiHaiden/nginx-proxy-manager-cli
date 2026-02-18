@@ -8,6 +8,13 @@ VENV_DIR="$INSTALL_ROOT/venv"
 BIN_DIR="${NPMCTL_BIN_DIR:-$HOME/.local/bin}"
 SHIM_PATH="$BIN_DIR/$APP_NAME"
 
+GITHUB_REPO="${NPMCTL_GITHUB_REPO:-NiHaiden/nginx-proxy-manager-cli}"
+GITHUB_REF="${NPMCTL_GITHUB_REF:-main}"
+REMOTE_SOURCE_URL="${NPMCTL_SOURCE_URL:-https://github.com/${GITHUB_REPO}/archive/refs/heads/${GITHUB_REF}.zip}"
+
+INSTALL_SOURCE=""
+INSTALL_SOURCE_DESC=""
+
 log() {
   printf "[npmctl-install] %s\n" "$*"
 }
@@ -19,7 +26,16 @@ fail() {
 
 ensure_requirements() {
   command -v python3 >/dev/null 2>&1 || fail "python3 is required"
-  [[ -f "$REPO_DIR/pyproject.toml" ]] || fail "pyproject.toml not found in $REPO_DIR"
+}
+
+detect_install_source() {
+  if [[ -f "$REPO_DIR/pyproject.toml" ]]; then
+    INSTALL_SOURCE="$REPO_DIR"
+    INSTALL_SOURCE_DESC="local checkout ($REPO_DIR)"
+  else
+    INSTALL_SOURCE="$REMOTE_SOURCE_URL"
+    INSTALL_SOURCE_DESC="GitHub archive ($REMOTE_SOURCE_URL)"
+  fi
 }
 
 create_venv() {
@@ -28,9 +44,9 @@ create_venv() {
 }
 
 install_package() {
-  log "Installing $APP_NAME from $REPO_DIR"
+  log "Installing $APP_NAME from $INSTALL_SOURCE_DESC"
   "$VENV_DIR/bin/pip" install --upgrade pip >/dev/null
-  "$VENV_DIR/bin/pip" install --upgrade "$REPO_DIR"
+  "$VENV_DIR/bin/pip" install --upgrade "$INSTALL_SOURCE"
 }
 
 create_shim() {
@@ -88,6 +104,7 @@ print_finish_message() {
 
 main() {
   ensure_requirements
+  detect_install_source
   create_venv
   install_package
   create_shim

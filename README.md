@@ -12,14 +12,28 @@ A small CLI for **Nginx Proxy Manager** that can:
 - [uv](https://docs.astral.sh/uv/)
 - A running Nginx Proxy Manager API endpoint (for example `http://10.0.2.1:81/api`)
 
-## Install (to your home directory)
+## Install
+
+### Quick install from GitHub (no clone required)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NiHaiden/nginx-proxy-manager-cli/main/install.sh | bash
+```
+
+### Install from a local checkout
 
 ```bash
 ./install.sh
 ```
 
-This installs the app into `~/.npmctl/venv` and places a launcher at `~/.local/bin/npmctl`.
-The installer also adds `~/.local/bin` to your shell PATH config.
+Both install methods place the app into `~/.npmctl/venv` and create a launcher at
+`~/.local/bin/npmctl`. The installer also adds `~/.local/bin` to your shell PATH config.
+
+Optional: install from a different branch/tag when using the GitHub installer:
+
+```bash
+NPMCTL_GITHUB_REF=main curl -fsSL https://raw.githubusercontent.com/NiHaiden/nginx-proxy-manager-cli/main/install.sh | bash
+```
 
 ## Development setup
 
@@ -28,6 +42,15 @@ uv sync
 ```
 
 ## CLI usage
+
+### 0) Run environment diagnostics (recommended on new systems)
+
+```bash
+npmctl doctor
+```
+
+This checks whether a recommended OS keyring backend is available and prints distro-specific
+install hints for Fedora/Arch/Ubuntu when it is missing.
 
 ### 1) Login and store token in OS keyring (base URL required)
 
@@ -96,6 +119,45 @@ uv run npmctl --debug add-proxy-with-cert \
   --forward-host 192.168.1.10 \
   --forward-port 8080
 ```
+
+## Troubleshooting
+
+### `Failed to read secret from keyring: No recommended backend was available`
+
+`npmctl` stores login and Cloudflare tokens in your OS keyring. On some Linux setups,
+no keyring backend is available by default.
+
+Start with:
+
+```bash
+npmctl doctor
+```
+
+Check available backends:
+
+```bash
+~/.npmctl/venv/bin/python -m keyring --list-backends
+```
+
+If this shows no usable backend, you have two options:
+
+1. **Recommended (secure):** install and run an OS keyring service (for example
+   GNOME Keyring / Secret Service, or KWallet).
+2. **Fallback (less secure):** install `keyrings.alt` in the same environment as `npmctl`.
+
+If you installed `npmctl` with the installer, run:
+
+```bash
+~/.npmctl/venv/bin/pip install keyrings.alt
+```
+
+Then retry:
+
+```bash
+npmctl login-status
+```
+
+> Note: `keyrings.alt` uses non-recommended backends. Prefer a real OS keyring when possible.
 
 ## Environment variables
 
