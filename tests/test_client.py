@@ -117,6 +117,25 @@ class ClientBehaviorTests(unittest.TestCase):
         _, kwargs = request_mock.call_args
         self.assertNotIn("json", kwargs)
 
+    def test_send_request_respects_verify_tls_setting(self) -> None:
+        client = NPMClient(base_url="https://192.168.1.1", token=None, verify_tls=False)
+
+        with patch("npmctl.client.httpx.request") as request_mock:
+            request_mock.return_value = httpx.Response(
+                status_code=200,
+                request=httpx.Request("GET", "https://192.168.1.1/proxy/network/integration/v1/sites"),
+            )
+            client._send_request(
+                "GET",
+                "https://192.168.1.1/proxy/network/integration/v1/sites",
+                {"Accept": "application/json"},
+                None,
+            )
+
+        _, kwargs = request_mock.call_args
+        self.assertIn("verify", kwargs)
+        self.assertFalse(kwargs["verify"])
+
     def test_raise_api_error_includes_debug_tip_when_debug_off(self) -> None:
         set_debug(False)
         client = NPMClient(base_url="https://npm.example/api", token="jwt-token")

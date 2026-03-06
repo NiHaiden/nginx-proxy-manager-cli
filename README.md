@@ -111,6 +111,8 @@ uv run npmctl list-unifi-sites \
   --gateway-url https://192.168.1.1
 ```
 
+If your UniFi gateway uses a self-signed cert, add `--insecure`.
+
 (You can also use `UNIFI_BASE_URL` and `UNIFI_API_KEY` env vars.)
 
 ### 5) Create a UniFi DNS A record
@@ -125,6 +127,8 @@ uv run npmctl add-unifi-dns-record \
   --ttl-seconds 14400
 ```
 
+For self-signed UniFi certs, add `--insecure`.
+
 If you have multiple sites, pass the explicit site ID:
 
 ```bash
@@ -136,7 +140,22 @@ uv run npmctl add-unifi-dns-record \
   --ttl-seconds 14400
 ```
 
-### 6) Create a Cloudflare DNS challenge certificate
+### 6) Create a full app setup in one command (UniFi DNS + NPM proxy host)
+
+```bash
+uv run npmctl add-new-app \
+  --gateway-url https://192.168.1.1 \
+  --domain app.nhaiden.io \
+  --app-ip 192.168.1.246 \
+  --app-port 3000 \
+  --insecure
+```
+
+This creates:
+- a UniFi DNS record (`app.nhaiden.io -> 192.168.1.246`)
+- an NPM proxy host for the same domain and app target (`192.168.1.246:3000`)
+
+### 7) Create a Cloudflare DNS challenge certificate
 
 ```bash
 uv run npmctl add-cert-cloudflare \
@@ -146,7 +165,7 @@ uv run npmctl add-cert-cloudflare \
 
 (You can still override with `--cloudflare-api-token` or `CLOUDFLARE_API_TOKEN`.)
 
-### 7) Create a proxy host with an existing certificate
+### 8) Create a proxy host with an existing certificate
 
 ```bash
 uv run npmctl add-proxy-host \
@@ -158,7 +177,7 @@ uv run npmctl add-proxy-host \
   --http2-support
 ```
 
-### 8) Create certificate + proxy host in one command
+### 9) Create certificate + proxy host in one command
 
 ```bash
 uv run npmctl --debug add-proxy-with-cert \

@@ -14,6 +14,7 @@ class NPMClient:
     base_url: str
     token: Optional[str] = None
     timeout_seconds: int = 180
+    verify_tls: bool = True
 
     def request_token(self, identity: str, secret: str, scope: str = "user") -> dict[str, Any]:
         body = {"identity": identity, "secret": secret, "scope": scope}
@@ -176,6 +177,7 @@ class NPMClient:
             request_kwargs: dict[str, Any] = {
                 "headers": headers,
                 "timeout": self.timeout_seconds,
+                "verify": self.verify_tls,
             }
             if json_body is not None:
                 request_kwargs["json"] = json_body
