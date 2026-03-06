@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import typer
 
-from .commands import auth, certificates, doctor, proxy_hosts, secrets
+from .commands import auth, certificates, doctor, proxy_hosts, secrets, unifi_dns
 from .debug import set_debug
 
 
 def create_app() -> typer.Typer:
     app = typer.Typer(
-        help="CLI for managing Nginx Proxy Manager proxy hosts and certificates",
+        help="CLI for managing Nginx Proxy Manager resources and UniFi DNS policies",
         context_settings={"help_option_names": ["-h", "--help"]},
     )
 
@@ -28,6 +28,7 @@ def create_app() -> typer.Typer:
     certificates.register(app)
     proxy_hosts.register(app)
     secrets.register(app)
+    unifi_dns.register(app)
     doctor.register(app)
     return app
 

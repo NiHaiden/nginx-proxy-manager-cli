@@ -9,6 +9,7 @@ SERVICE_NAME = "npmctl"
 LEGACY_SERVICE_NAME = "npm-cli"
 
 CF_TOKEN_KEY = "cloudflare_api_token"
+UNIFI_API_KEY_KEY = "unifi_api_key"
 LOGIN_INFO_KEY = "login_info"
 
 try:
@@ -114,4 +115,18 @@ def resolve_cloudflare_token(cli_or_env_token: Optional[str]) -> str:
     raise NPMError(
         "Missing Cloudflare API token. Use --cloudflare-api-token, set CLOUDFLARE_API_TOKEN, "
         "or run `npmctl cf-token-set`."
+    )
+
+
+def resolve_unifi_api_key(cli_or_env_api_key: Optional[str]) -> str:
+    if cli_or_env_api_key:
+        return cli_or_env_api_key
+
+    api_key = get_secret(UNIFI_API_KEY_KEY)
+    if api_key:
+        return api_key
+
+    raise NPMError(
+        "Missing UniFi API key. Use --unifi-api-key, set UNIFI_API_KEY, "
+        "or run `npmctl unifi-api-key-set`."
     )

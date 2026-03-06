@@ -1,7 +1,7 @@
 [project]
 name = "npmctl"
 version = "0.1.0"
-description = "CLI for Nginx Proxy Manager proxy hosts and Cloudflare DNS challenge certificates"
+description = "CLI for Nginx Proxy Manager resources and UniFi DNS policy automation"
 readme = "README.md"
 authors = [
     { name = "Niklas Haiden", email = "niklas.haiden@gmail.com" }

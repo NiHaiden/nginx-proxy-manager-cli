@@ -82,6 +82,50 @@ class NPMClient:
 
         return self._request("POST", "/nginx/proxy-hosts", json_body=payload)
 
+    def list_unifi_sites(self, *, unifi_api_key: str) -> Any:
+        headers = {
+            "User-Agent": "npmctl",
+            "Accept": "application/json",
+            "X-API-KEY": unifi_api_key,
+        }
+        return self._request(
+            "GET",
+            "/proxy/network/integration/v1/sites",
+            auth_required=False,
+            extra_headers=headers,
+        )
+
+    def create_unifi_dns_record(
+        self,
+        *,
+        unifi_api_key: str,
+        site_id: str,
+        domain: str,
+        ipv4_address: str,
+        ttl_seconds: int = 14400,
+        enabled: bool = True,
+        record_type: str = "A_RECORD",
+    ) -> Any:
+        payload = {
+            "type": record_type,
+            "enabled": enabled,
+            "domain": domain,
+            "ipv4Address": ipv4_address,
+            "ttlSeconds": ttl_seconds,
+        }
+        headers = {
+            "User-Agent": "npmctl",
+            "Accept": "application/json",
+            "X-API-KEY": unifi_api_key,
+        }
+        return self._request(
+            "POST",
+            f"/proxy/network/integration/v1/sites/{site_id}/dns/policies",
+            json_body=payload,
+            auth_required=False,
+            extra_headers=headers,
+        )
+
     def _request(
         self,
         method: str,
@@ -89,8 +133,9 @@ class NPMClient:
         *,
         json_body: Optional[dict[str, Any]] = None,
         auth_required: bool = True,
+        extra_headers: Optional[dict[str, str]] = None,
     ) -> Any:
-        headers = self._headers(auth_required)
+        headers = self._headers(auth_required, extra_headers=extra_headers)
         url = f"{self.base_url.rstrip('/')}{path}"
 
         self._log_request(method, url, json_body)
@@ -103,12 +148,21 @@ class NPMClient:
 
         return payload
 
-    def _headers(self, auth_required: bool) -> dict[str, str]:
+    def _headers(
+        self,
+        auth_required: bool,
+        *,
+        extra_headers: Optional[dict[str, str]] = None,
+    ) -> dict[str, str]:
         headers = {"Content-Type": "application/json"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         elif auth_required:
             raise NPMError("No API token configured. Run `npmctl login` first.")
+
+        if extra_headers:
+            headers.update(extra_headers)
+
         return headers
 
     def _send_request(
@@ -119,13 +173,14 @@ class NPMClient:
         json_body: Optional[dict[str, Any]],
     ) -> httpx.Response:
         try:
-            return httpx.request(
-                method,
-                url,
-                headers=headers,
-                json=json_body,
-                timeout=self.timeout_seconds,
-            )
+            request_kwargs: dict[str, Any] = {
+                "headers": headers,
+                "timeout": self.timeout_seconds,
+            }
+            if json_body is not None:
+                request_kwargs["json"] = json_body
+
+            return httpx.request(method, url, **request_kwargs)
         except httpx.HTTPError as exc:
             raise NPMError(f"HTTP request failed: {exc}") from exc
 

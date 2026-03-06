@@ -13,6 +13,9 @@ SENSITIVE_KEYS = {
     "password",
     "dns_provider_credentials",
     "cloudflare_api_token",
+    "x-api-key",
+    "api_key",
+    "unifi_api_key",
 }
 
 

@@ -1,16 +1,18 @@
 # npmctl
 
-A small CLI for **Nginx Proxy Manager** that can:
+A small CLI for **Nginx Proxy Manager** and **UniFi DNS policies** that can:
 
 - create Let's Encrypt certificates using **Cloudflare DNS challenge**
 - create proxy hosts
 - create a certificate + proxy host in one command
+- create UniFi DNS policy records via the UniFi Integration API
 
 ## Requirements
 
 - Python 3.9+
 - [uv](https://docs.astral.sh/uv/)
 - A running Nginx Proxy Manager API endpoint (for example `http://10.0.2.1:81/api`)
+- (Optional for UniFi DNS commands) a reachable UniFi gateway URL (for example `https://192.168.1.1`)
 
 ## Install
 
@@ -89,7 +91,52 @@ To remove it later:
 uv run npmctl cf-token-delete
 ```
 
-### 3) Create a Cloudflare DNS challenge certificate
+### 3) (Recommended) Store UniFi API key in OS keyring
+
+```bash
+uv run npmctl unifi-api-key-set
+uv run npmctl unifi-api-key-status
+```
+
+To remove it later:
+
+```bash
+uv run npmctl unifi-api-key-delete
+```
+
+### 4) List UniFi sites (to get the site ID)
+
+```bash
+uv run npmctl list-unifi-sites \
+  --gateway-url https://192.168.1.1
+```
+
+(You can also use `UNIFI_BASE_URL` and `UNIFI_API_KEY` env vars.)
+
+### 5) Create a UniFi DNS A record
+
+If you have exactly one UniFi site, `--site-id` can be omitted and npmctl auto-selects it.
+
+```bash
+uv run npmctl add-unifi-dns-record \
+  --gateway-url https://192.168.1.1 \
+  --domain test.nhaiden.io \
+  --ipv4-address 192.168.1.246 \
+  --ttl-seconds 14400
+```
+
+If you have multiple sites, pass the explicit site ID:
+
+```bash
+uv run npmctl add-unifi-dns-record \
+  --gateway-url https://192.168.1.1 \
+  --site-id 88f7af54-98f8-306a-a1c7-c9349722b1f6 \
+  --domain test.nhaiden.io \
+  --ipv4-address 192.168.1.246 \
+  --ttl-seconds 14400
+```
+
+### 6) Create a Cloudflare DNS challenge certificate
 
 ```bash
 uv run npmctl add-cert-cloudflare \
@@ -99,7 +146,7 @@ uv run npmctl add-cert-cloudflare \
 
 (You can still override with `--cloudflare-api-token` or `CLOUDFLARE_API_TOKEN`.)
 
-### 4) Create a proxy host with an existing certificate
+### 7) Create a proxy host with an existing certificate
 
 ```bash
 uv run npmctl add-proxy-host \
@@ -111,7 +158,7 @@ uv run npmctl add-proxy-host \
   --http2-support
 ```
 
-### 5) Create certificate + proxy host in one command
+### 8) Create certificate + proxy host in one command
 
 ```bash
 uv run npmctl --debug add-proxy-with-cert \
@@ -124,7 +171,7 @@ uv run npmctl --debug add-proxy-with-cert \
 
 ### `Failed to read secret from keyring: No recommended backend was available`
 
-`npmctl` stores login and Cloudflare tokens in your OS keyring. On some Linux setups,
+`npmctl` stores login, Cloudflare tokens, and UniFi API keys in your OS keyring. On some Linux setups,
 no keyring backend is available by default.
 
 Start with:
@@ -166,5 +213,7 @@ You can use env vars instead of passing values every time:
 - `NPM_BASE_URL` (e.g. `http://192.168.1.246/api`)
 - `NPM_TOKEN`
 - `CLOUDFLARE_API_TOKEN`
+- `UNIFI_BASE_URL` (e.g. `https://192.168.1.1`)
+- `UNIFI_API_KEY`
 - `NPM_CLI_CONFIG` (optional legacy fallback config file location)
 - `NPM_CLI_DEBUG=1` (enable verbose request/response logs)
