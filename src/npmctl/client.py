@@ -159,7 +159,7 @@ class NPMClient:
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         elif auth_required:
-            raise NPMError("No API token configured. Run `npmctl login` first.")
+            raise NPMError("No API token configured. Run `npmctl auth login` first.")
 
         if extra_headers:
             headers.update(extra_headers)

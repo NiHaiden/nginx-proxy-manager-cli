@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import Optional
 
 import typer
@@ -21,6 +22,58 @@ def register(app: typer.Typer) -> None:
     app.command("unifi-api-key-set")(unifi_api_key_set)
     app.command("unifi-api-key-delete")(unifi_api_key_delete)
     app.command("unifi-api-key-status")(unifi_api_key_status)
+
+
+class SecretName(str, Enum):
+    CLOUDFLARE_TOKEN = "cloudflare-token"
+    UNIFI_API_KEY = "unifi-api-key"
+
+
+def set_secret_value(
+    secret_name: SecretName = typer.Argument(..., help="Secret to store"),
+    value: Optional[str] = typer.Option(
+        None,
+        "--value",
+        prompt=True,
+        hide_input=True,
+        confirmation_prompt=True,
+        help="Secret value",
+    ),
+) -> None:
+    """Store a secret securely in OS keyring."""
+    try:
+        spec = _secret_spec(secret_name)
+        set_secret(spec["key"], value or "")
+        typer.secho(spec["saved_message"], fg=typer.colors.GREEN)
+    except Exception as exc:  # noqa: BLE001
+        exit_with_error(exc)
+
+
+def delete_secret_value(
+    secret_name: SecretName = typer.Argument(..., help="Secret to delete"),
+) -> None:
+    """Delete a stored secret from OS keyring."""
+    try:
+        spec = _secret_spec(secret_name)
+        delete_secret(spec["key"])
+        typer.secho(spec["deleted_message"], fg=typer.colors.GREEN)
+    except Exception as exc:  # noqa: BLE001
+        exit_with_error(exc)
+
+
+def secret_status(
+    secret_name: SecretName = typer.Argument(..., help="Secret to inspect"),
+) -> None:
+    """Show whether a secret is stored in keyring."""
+    try:
+        spec = _secret_spec(secret_name)
+        exists = bool(get_secret(spec["key"]))
+        if exists:
+            typer.secho(spec["present_message"], fg=typer.colors.GREEN)
+        else:
+            typer.secho(spec["missing_message"], fg=typer.colors.YELLOW)
+    except Exception as exc:  # noqa: BLE001
+        exit_with_error(exc)
 
 
 def cf_token_set(
@@ -99,3 +152,22 @@ def unifi_api_key_status() -> None:
             typer.secho("No UniFi API key stored in keyring.", fg=typer.colors.YELLOW)
     except Exception as exc:  # noqa: BLE001
         exit_with_error(exc)
+
+
+def _secret_spec(secret_name: SecretName) -> dict[str, str]:
+    if secret_name == SecretName.CLOUDFLARE_TOKEN:
+        return {
+            "key": CF_TOKEN_KEY,
+            "saved_message": "Cloudflare token saved in OS keyring.",
+            "deleted_message": "Cloudflare token deleted from OS keyring.",
+            "present_message": "Cloudflare token is stored in keyring.",
+            "missing_message": "No Cloudflare token stored in keyring.",
+        }
+
+    return {
+        "key": UNIFI_API_KEY_KEY,
+        "saved_message": "UniFi API key saved in OS keyring.",
+        "deleted_message": "UniFi API key deleted from OS keyring.",
+        "present_message": "UniFi API key is stored in keyring.",
+        "missing_message": "No UniFi API key stored in keyring.",
+    }

@@ -114,7 +114,7 @@ def resolve_cloudflare_token(cli_or_env_token: Optional[str]) -> str:
 
     raise NPMError(
         "Missing Cloudflare API token. Use --cloudflare-api-token, set CLOUDFLARE_API_TOKEN, "
-        "or run `npmctl cf-token-set`."
+        "or run `npmctl secret set cloudflare-token`."
     )
 
 
@@ -128,5 +128,5 @@ def resolve_unifi_api_key(cli_or_env_api_key: Optional[str]) -> str:
 
     raise NPMError(
         "Missing UniFi API key. Use --unifi-api-key, set UNIFI_API_KEY, "
-        "or run `npmctl unifi-api-key-set`."
+        "or run `npmctl secret set unifi-api-key`."
     )
