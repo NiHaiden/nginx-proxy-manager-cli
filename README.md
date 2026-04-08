@@ -30,19 +30,19 @@ npmctl doctor
 ### 3) Login to Nginx Proxy Manager
 
 ```bash
-npmctl login --base-url http://192.168.1.246/api --identity admin@example.com
+npmctl auth login --base-url http://192.168.1.246/api --identity admin@example.com
 ```
 
 ### 4) Store your UniFi API key
 
 ```bash
-npmctl unifi-api-key-set
+npmctl secret set unifi-api-key
 ```
 
 ### 5) Create DNS + proxy host in one command
 
 ```bash
-npmctl add-new-app \
+npmctl add app \
   --gateway-url https://192.168.1.1 \
   --domain app.nhaiden.io \
   --app-ip 192.168.1.246 \
@@ -54,10 +54,10 @@ npmctl add-new-app \
 
 ## Common tasks
 
-- Add only a UniFi DNS record: [`add-unifi-dns-record`](docs/workflows/unifi-dns.md#add-a-unifi-dns-record)
-- List UniFi sites: [`list-unifi-sites`](docs/workflows/unifi-dns.md#list-unifi-sites)
-- Create a Cloudflare certificate: [`add-cert-cloudflare`](docs/workflows/nginx-proxy-manager.md#create-a-cloudflare-dns-challenge-certificate)
-- Create a proxy host: [`add-proxy-host`](docs/workflows/nginx-proxy-manager.md#create-a-proxy-host-with-an-existing-certificate)
+- Add only a UniFi DNS record: [`npmctl dns add`](docs/workflows/unifi-dns.md#add-a-unifi-dns-record)
+- List UniFi sites: [`npmctl site list`](docs/workflows/unifi-dns.md#list-unifi-sites)
+- Create a Cloudflare certificate: [`npmctl cert add`](docs/workflows/nginx-proxy-manager.md#create-a-cloudflare-dns-challenge-certificate)
+- Create a proxy host: [`npmctl proxy add`](docs/workflows/nginx-proxy-manager.md#create-a-proxy-host)
 
 ## Project requirements
 

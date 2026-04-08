@@ -47,45 +47,45 @@ npmctl doctor
 ### 2) Login and store NPM token in keyring
 
 ```bash
-npmctl login --base-url http://192.168.1.246/api --identity admin@example.com
+npmctl auth login --base-url http://192.168.1.246/api --identity admin@example.com
 ```
 
 Check status:
 
 ```bash
-npmctl login-status
+npmctl auth status
 ```
 
 Remove stored login:
 
 ```bash
-npmctl logout
+npmctl auth logout
 ```
 
 ### 3) Store UniFi API key (recommended)
 
 ```bash
-npmctl unifi-api-key-set
-npmctl unifi-api-key-status
+npmctl secret set unifi-api-key
+npmctl secret status unifi-api-key
 ```
 
 Remove stored key:
 
 ```bash
-npmctl unifi-api-key-delete
+npmctl secret delete unifi-api-key
 ```
 
 ### 4) Store Cloudflare token (if using cert commands)
 
 ```bash
-npmctl cf-token-set
-npmctl cf-token-status
+npmctl secret set cloudflare-token
+npmctl secret status cloudflare-token
 ```
 
 Remove stored token:
 
 ```bash
-npmctl cf-token-delete
+npmctl secret delete cloudflare-token
 ```
 
 ## Next steps

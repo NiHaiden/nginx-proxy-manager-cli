@@ -32,7 +32,7 @@ npmctl doctor
 4. Re-check status:
 
 ```bash
-npmctl login-status
+npmctl auth status
 ```
 
 ### Fallback (less secure)
@@ -52,9 +52,9 @@ HTTP request failed: [SSL: CERTIFICATE_VERIFY_FAILED]
 Use `--insecure` for UniFi commands:
 
 ```bash
-npmctl list-unifi-sites --gateway-url https://192.168.1.1 --insecure
-npmctl add-unifi-dns-record --gateway-url https://192.168.1.1 --domain app.local --ipv4-address 192.168.1.50 --insecure
-npmctl add-new-app --gateway-url https://192.168.1.1 --domain app.local --app-ip 192.168.1.50 --app-port 3000 --insecure
+npmctl site list --gateway-url https://192.168.1.1 --insecure
+npmctl dns add --gateway-url https://192.168.1.1 --domain app.local --ipv4-address 192.168.1.50 --insecure
+npmctl app add --gateway-url https://192.168.1.1 --domain app.local --app-ip 192.168.1.50 --app-port 3000 --insecure
 ```
 
 > `--insecure` disables TLS certificate verification for UniFi requests.

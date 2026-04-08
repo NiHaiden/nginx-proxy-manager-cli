@@ -162,7 +162,7 @@ def _print_fix_hints(distro_info: dict[str, str]) -> None:
         typer.echo("Install and run an OS keyring backend (Secret Service or KWallet).")
 
     typer.echo(
-        "Then run `npmctl login-status` again from your normal user session "
+        "Then run `npmctl auth status` again from your normal user session "
         "(not a minimal headless shell without DBus)."
     )
 

@@ -41,7 +41,7 @@ def resolve_base_url_and_token(
         token or os.environ.get("NPM_TOKEN") or keyring_login.get("token") or legacy_login.get("token")
     )
     if require_token and not resolved_token:
-        raise NPMError("Missing API token. Run `npmctl login` or set NPM_TOKEN.")
+        raise NPMError("Missing API token. Run `npmctl auth login` or set NPM_TOKEN.")
 
     log(f"Using base URL: {resolved_base_url}")
     log(f"Using token: {'yes' if resolved_token else 'no'}")
