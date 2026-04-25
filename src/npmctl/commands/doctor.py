@@ -2,10 +2,26 @@ from __future__ import annotations
 
 import platform
 import sys
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import typer
+
+from ..errors import NPMError
+from ..secrets_store import (
+    CF_TOKEN_KEY,
+    UNIFI_API_KEY_KEY,
+    get_login_info,
+    get_secret,
+)
+
+
+@dataclass(frozen=True)
+class _SecretCheck:
+    label: str
+    exists: Callable[[], bool]
+    fix_command: str
 
 
 def register(app: typer.Typer) -> None:
@@ -68,6 +84,8 @@ def _run_doctor() -> list[str]:
             for backend_name in sorted(set(available_recommended)):
                 typer.echo(f"  - {backend_name}")
 
+        issues.extend(_check_stored_secrets())
+
     if issues:
         typer.secho("\nIssues found:", fg=typer.colors.RED, bold=True)
         for issue in issues:
@@ -75,9 +93,54 @@ def _run_doctor() -> list[str]:
 
         _print_fix_hints(distro_info)
     else:
-        typer.secho("\nAll checks passed.", fg=typer.colors.GREEN, bold=True)
+        typer.secho("\nNo blocking issues found.", fg=typer.colors.GREEN, bold=True)
 
     return issues
+
+
+def _check_stored_secrets() -> list[str]:
+    issues: list[str] = []
+    typer.secho("\nStored secrets:", fg=typer.colors.CYAN, bold=True)
+
+    secret_checks = [
+        _SecretCheck(
+            label="NPM login token",
+            exists=_has_login_token,
+            fix_command="npmctl auth login",
+        ),
+        _SecretCheck(
+            label="Cloudflare token",
+            exists=lambda: bool(get_secret(CF_TOKEN_KEY)),
+            fix_command="npmctl secret set cloudflare-token",
+        ),
+        _SecretCheck(
+            label="UniFi API key",
+            exists=lambda: bool(get_secret(UNIFI_API_KEY_KEY)),
+            fix_command="npmctl secret set unifi-api-key",
+        ),
+    ]
+
+    for check in secret_checks:
+        try:
+            exists = check.exists()
+        except NPMError as exc:
+            typer.secho(f"✘ {check.label}: unable to read keyring", fg=typer.colors.RED)
+            typer.echo(f"  {exc}")
+            issues.append(f"Unable to read {check.label} from keyring.")
+            continue
+
+        if exists:
+            typer.secho(f"✔ {check.label}: stored", fg=typer.colors.GREEN)
+        else:
+            typer.secho(f"⚠ {check.label}: not stored", fg=typer.colors.YELLOW)
+            typer.echo(f"  Add it with `{check.fix_command}`.")
+
+    return issues
+
+
+def _has_login_token() -> bool:
+    info = get_login_info()
+    return bool(info.get("token"))
 
 
 def _load_keyring_modules() -> tuple[Any, Any, Any, Optional[Exception]]:
