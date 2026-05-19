@@ -65,6 +65,16 @@ npmctl add app \
 - Running Nginx Proxy Manager API endpoint (for example `http://10.0.2.1:81/api`)
 - (Optional for UniFi commands) UniFi gateway URL (for example `https://192.168.1.1`)
 
+## Versioning
+
+The current version is `0.0.1` and is stored in [`VERSION`](VERSION).
+Release tags use the matching `v` prefix, for example `v0.0.1`.
+
+```bash
+npmctl --version
+npmctl version
+```
+
 ---
 
 If something fails, check **[Troubleshooting](docs/troubleshooting.md)** first.

@@ -27,7 +27,17 @@ install_binary() {
   mkdir -p "$BIN_DIR"
   if [[ -f "$REPO_DIR/go.mod" ]]; then
     log "Building $APP_NAME from local checkout ($REPO_DIR)"
-    (cd "$REPO_DIR" && go build -o "$BIN_PATH" ./cmd/npmctl)
+    local version
+    local commit
+    local build_date
+    version="$(tr -d '[:space:]' < "$REPO_DIR/VERSION")"
+    commit="$(cd "$REPO_DIR" && git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+    build_date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    (cd "$REPO_DIR" && go build \
+      -trimpath \
+      -ldflags="-s -w -X github.com/NiHaiden/nginx-proxy-manager-cli/internal/npmctl.Version=$version -X github.com/NiHaiden/nginx-proxy-manager-cli/internal/npmctl.Commit=$commit -X github.com/NiHaiden/nginx-proxy-manager-cli/internal/npmctl.BuildDate=$build_date" \
+      -o "$BIN_PATH" \
+      ./cmd/npmctl)
   else
     log "Installing $APP_NAME from $GO_PACKAGE"
     GOBIN="$BIN_DIR" go install "$GO_PACKAGE"

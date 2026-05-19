@@ -26,9 +26,11 @@ Commands:
   status    Workflow shortcuts for inspecting saved state.
   delete    Workflow shortcuts for deleting saved secrets.
   doctor    Run environment diagnostics and keyring backend checks.
+  version   Show version information.
 
 Options:
   -h, --help   Show help.
+  -v, --version Show version.
   --debug      Enable verbose request/response debug logging.`)
 }
 

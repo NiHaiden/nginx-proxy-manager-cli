@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: "1.24.x"
+  VERSION_PACKAGE: "github.com/NiHaiden/nginx-proxy-manager-cli/internal/npmctl"
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Verify formatting
+        run: |
+          files="$(gofmt -l .)"
+          if [ -n "$files" ]; then
+            echo "$files"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -race -coverprofile=coverage.out ./...
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}
+          path: coverage.out
+          if-no-files-found: error
+
+  build:
+    name: Build ${{ matrix.goos }}-${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Read build metadata
+        id: metadata
+        run: |
+          echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+          echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Build binary
+        env:
+          CGO_ENABLED: "0"
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+          BUILD_DATE: ${{ steps.metadata.outputs.date }}
+        run: |
+          mkdir -p dist
+          go build \
+            -trimpath \
+            -ldflags="-s -w -X ${VERSION_PACKAGE}.Version=${VERSION} -X ${VERSION_PACKAGE}.Commit=${GITHUB_SHA} -X ${VERSION_PACKAGE}.BuildDate=${BUILD_DATE}" \
+            -o "dist/npmctl-${GOOS}-${GOARCH}" \
+            ./cmd/npmctl
+
+      - name: Package binary
+        run: |
+          cd dist
+          shasum -a 256 "npmctl-${{ matrix.goos }}-${{ matrix.goarch }}" > "npmctl-${{ matrix.goos }}-${{ matrix.goarch }}.sha256"
+          tar -czf "npmctl-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" \
+            "npmctl-${{ matrix.goos }}-${{ matrix.goarch }}" \
+            "npmctl-${{ matrix.goos }}-${{ matrix.goarch }}.sha256"
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: npmctl-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            dist/npmctl-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+            dist/npmctl-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
+          if-no-files-found: error

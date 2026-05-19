@@ -28,6 +28,11 @@ func (c *CLI) Run(args []string) int {
 	args = c.configureGlobalOptions(args)
 	c.logger = debugLogger{enabled: c.debug, err: c.err}
 
+	if len(args) > 0 && isVersion(args[0]) {
+		c.printVersion(false)
+		return 0
+	}
+
 	if len(args) == 0 || isHelp(args[0]) {
 		c.printRootHelp()
 		return 0
@@ -83,6 +88,9 @@ func (c *CLI) dispatch(args []string) error {
 			return nil
 		}
 		return c.runDoctor()
+	case "version":
+		c.printVersion(true)
+		return nil
 	case "login":
 		return c.runAuthLogin(args[1:])
 	case "login-status":
@@ -781,6 +789,10 @@ func isHelp(arg string) bool {
 	return arg == "--help" || arg == "-h"
 }
 
+func isVersion(arg string) bool {
+	return arg == "--version" || arg == "-v"
+}
+
 func hasHelp(args []string) bool {
 	for _, arg := range args {
 		if isHelp(arg) {
@@ -788,6 +800,14 @@ func hasHelp(args []string) bool {
 		}
 	}
 	return false
+}
+
+func (c *CLI) printVersion(verbose bool) {
+	if verbose {
+		fmt.Fprintln(c.out, fullVersion())
+		return
+	}
+	fmt.Fprintln(c.out, versionSummary())
 }
 
 func truthy(value string) bool {

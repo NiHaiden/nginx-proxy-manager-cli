@@ -1,10 +1,8 @@
-# Python-generated files
-__pycache__/
-*.py[oc]
-build/
+# Go build outputs
+/npmctl
+bin/
 dist/
-wheels/
-*.egg-info
+coverage.out
 
-# Virtual environments
-.venv
+# Editor and OS files
+.DS_Store

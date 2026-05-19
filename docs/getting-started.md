@@ -35,6 +35,9 @@ go test ./...
 go build -o npmctl ./cmd/npmctl
 ```
 
+The project version is stored in `VERSION`. Release tags should match it with a
+`v` prefix, for example `VERSION=0.0.1` is released as `v0.0.1`.
+
 ## First-run checklist
 
 ### 1) Run diagnostics

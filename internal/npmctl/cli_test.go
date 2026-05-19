@@ -55,6 +55,29 @@ func TestHiddenLegacyAliasStillExists(t *testing.T) {
 	}
 }
 
+func TestVersionFlagAndCommand(t *testing.T) {
+	var out, err bytes.Buffer
+	cli := NewCLI(strings.NewReader(""), &out, &err, newMemorySecretStore())
+
+	if code := cli.Run([]string{"--version"}); code != 0 {
+		t.Fatalf("exit code = %d, stderr = %s", code, err.String())
+	}
+	if got := strings.TrimSpace(out.String()); got != "npmctl 0.0.1" {
+		t.Fatalf("--version output = %q", got)
+	}
+
+	out.Reset()
+	if code := cli.Run([]string{"version"}); code != 0 {
+		t.Fatalf("exit code = %d, stderr = %s", code, err.String())
+	}
+	output := out.String()
+	for _, expected := range []string{"npmctl 0.0.1", "commit:", "built:"} {
+		if !strings.Contains(output, expected) {
+			t.Fatalf("version output missing %q:\n%s", expected, output)
+		}
+	}
+}
+
 func TestSecretSetStatusDeleteUsesStore(t *testing.T) {
 	store := newMemorySecretStore()
 	var out, err bytes.Buffer
