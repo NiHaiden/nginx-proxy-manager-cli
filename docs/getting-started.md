@@ -4,8 +4,7 @@
 
 ## Requirements
 
-- Python 3.9+
-- [uv](https://docs.astral.sh/uv/)
+- Go 1.24+ when building from source
 - Nginx Proxy Manager API endpoint (for example `http://10.0.2.1:81/api`)
 - Optional for UniFi features: UniFi gateway URL (for example `https://192.168.1.1`)
 
@@ -25,16 +24,19 @@ curl -fsSL https://raw.githubusercontent.com/NiHaiden/nginx-proxy-manager-cli/ma
 
 The installer puts:
 
-- virtual environment in `~/.npmctl/venv`
-- launcher at `~/.local/bin/npmctl`
+- binary at `~/.local/bin/npmctl`
 
 It also tries to add `~/.local/bin` to your shell PATH config.
 
 ## Development setup
 
 ```bash
-uv sync
+go test ./...
+go build -o npmctl ./cmd/npmctl
 ```
+
+The project version is stored in `VERSION`. Release tags should match it with a
+`v` prefix, for example `VERSION=0.0.1` is released as `v0.0.1`.
 
 ## First-run checklist
 

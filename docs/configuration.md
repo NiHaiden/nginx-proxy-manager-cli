@@ -6,6 +6,11 @@
 
 `npmctl` stores secrets in your OS keyring.
 
+The Go CLI uses macOS Keychain via the `security` command on macOS and Secret
+Service via `secret-tool` on Linux. It keeps the existing service names
+(`npmctl`, with fallback reads from legacy `npm-cli`) so previously stored
+secrets continue to work.
+
 ### Login token
 
 - `npmctl auth login`
