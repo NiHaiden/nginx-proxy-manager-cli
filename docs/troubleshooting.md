@@ -7,7 +7,7 @@
 Error example:
 
 ```text
-Failed to read secret from keyring: No recommended backend was available
+Failed to read secret from keyring
 ```
 
 ### Fix steps
@@ -18,14 +18,16 @@ Failed to read secret from keyring: No recommended backend was available
 npmctl doctor
 ```
 
-2. Check detected keyring backends:
+2. Check the OS keyring command:
 
 ```bash
-~/.npmctl/venv/bin/python -m keyring --list-backends
+command -v security    # macOS
+command -v secret-tool # Linux
 ```
 
 3. Install/run a recommended OS keyring service:
 
+- macOS Keychain
 - Secret Service (GNOME Keyring)
 - KWallet
 
@@ -35,11 +37,8 @@ npmctl doctor
 npmctl auth status
 ```
 
-### Fallback (less secure)
-
-```bash
-~/.npmctl/venv/bin/pip install keyrings.alt
-```
+On Linux, install `libsecret-tools` or your distribution's equivalent package
+if `secret-tool` is missing.
 
 ## UniFi self-signed certificate errors
 

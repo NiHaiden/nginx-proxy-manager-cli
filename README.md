@@ -61,8 +61,7 @@ npmctl add app \
 
 ## Project requirements
 
-- Python 3.9+
-- [uv](https://docs.astral.sh/uv/)
+- Go 1.24+ when building from source
 - Running Nginx Proxy Manager API endpoint (for example `http://10.0.2.1:81/api`)
 - (Optional for UniFi commands) UniFi gateway URL (for example `https://192.168.1.1`)
 
